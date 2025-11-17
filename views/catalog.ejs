@@ -1,0 +1,75 @@
+<%- include('partials/header', { title: 'Product Catalog', bodyClass: 'page-catalog', cartCount }) %>
+<main class="page page-catalog">
+  <section class="page-hero">
+    <div>
+      <p class="eyebrow">QA Playground</p>
+      <h1>Product Catalog</h1>
+      <p class="lead">
+        Browse our curated set of testing-friendly tech gear. Adjust quantities,
+        simulate carts, and place mock orders without touching a live system.
+      </p>
+    </div>
+  </section>
+  <div class="catalog-controls card">
+    <div class="search-control">
+      <input
+        type="text"
+        placeholder="Search products..."
+        data-catalog-search
+        aria-label="Search products"
+      />
+    </div>
+    <label class="control checkbox">
+      <input type="checkbox" data-hide-out /> Hide out of stock items
+    </label>
+    <div class="control select">
+      <select data-sort>
+        <option value="name">Name (A-Z)</option>
+        <option value="price-asc">Price (Low-High)</option>
+        <option value="price-desc">Price (High-Low)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="product-grid">
+    <% products.forEach((product) => { %>
+    <% const stockState = product.inStock ? 'in' : 'out'; %>
+    <article
+      class="product-card card"
+      data-product
+      data-name="<%= product.name.toLowerCase() %>"
+      data-price="<%= product.price %>"
+      data-stock="<%= stockState %>"
+    >
+      <% if (!product.inStock) { %>
+      <span class="badge badge-warning">Out of Stock</span>
+      <% } %>
+      <div class="product-image">
+        <span class="image-placeholder">IMG</span>
+      </div>
+      <div class="product-body">
+        <div>
+          <h2><%= product.name %></h2>
+          <p class="muted"><%= product.description %></p>
+        </div>
+        <div class="product-footer">
+          <div class="price">$<%= product.price.toFixed(2) %></div>
+          <button
+            class="btn primary small"
+            data-add-to-cart
+            data-product-id="<%= product.id %>"
+            data-product-name="<%= product.name %>"
+            data-product-sku="<%= product.sku %>"
+            data-product-price="<%= product.price %>"
+            data-product-description="<%= product.description %>"
+            <%= product.inStock ? '' : 'disabled' %>
+          >
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </article>
+    <% }) %>
+  </div>
+</main>
+<%- include('partials/footer') %>

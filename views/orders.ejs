@@ -1,0 +1,17 @@
+<%- include('partials/header', { title: 'Orders', bodyClass: 'page-orders' }) %>
+<main class="page orders-page">
+  <div class="page-hero">
+    <div>
+      <p class="eyebrow">Order Management</p>
+      <h1>Recent Orders</h1>
+      <p class="lead">
+        Each entry represents a mock checkout flow; use them to build
+        end-to-end tests or validate API responses.
+      </p>
+    </div>
+  </div>
+  <section class="card orders-frame">
+    <iframe src="/orders/embed" title="Recent Orders" data-orders-iframe></iframe>
+  </section>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,44 @@
+<%- include('partials/header', { title: 'Shopping Cart', bodyClass: 'page-cart', cartCount: item.quantity }) %>
+<main class="page cart-page">
+  <div class="page-hero">
+    <div>
+      <p class="eyebrow">Your Items</p>
+      <h1>Shopping Cart</h1>
+    </div>
+  </div>
+  <div class="cart-layout">
+    <section class="card cart-items">
+      <div class="cart-item-list" data-cart-items></div>
+      <p class="muted empty-cart hidden" data-cart-empty>
+        Your cart is empty. Visit the catalog to add items.
+      </p>
+    </section>
+    <aside class="card order-summary">
+      <h3>Order Summary</h3>
+      <dl class="summary-list">
+        <div>
+          <dt>Subtotal</dt>
+          <dd>$<span data-subtotal><%= subtotal.toFixed(2) %></span></dd>
+        </div>
+        <div>
+          <dt>Shipping</dt>
+          <dd>$<span data-shipping><%= shipping.toFixed(2) %></span></dd>
+        </div>
+      </dl>
+      <div class="summary-total">
+        <span>Total</span>
+        <strong>$<span data-total><%= (subtotal + shipping).toFixed(2) %></span></strong>
+      </div>
+      <div class="summary-actions">
+        <a href="/checkout" class="btn primary block">Proceed to Checkout</a>
+        <a href="/" class="btn ghost block">Continue Shopping</a>
+      </div>
+    </aside>
+  </div>
+</main>
+<script>
+  window.cartConfig = {
+    shipping: <%= shipping %>
+  };
+</script>
+<%- include('partials/footer') %>

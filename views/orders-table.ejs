@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orders Table</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="orders-embed">
+    <section class="orders-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!orders.length) { %>
+          <tr>
+            <td colspan="6" class="empty">No orders yet. Place one from checkout.</td>
+          </tr>
+          <% } %>
+          <% orders.forEach((order) => { %>
+          <tr>
+            <td><%= order.orderNumber %></td>
+            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+            <td><%= order.items.reduce((sum, item) => sum + (item.quantity || 0), 0) %> item(s)</td>
+            <td>$<%= Number(order.total).toFixed(2) %></td>
+            <td>
+              <span class="status-badge"><%= order.status %></span>
+            </td>
+            <td>
+              <button class="btn ghost small" data-view-order="<%= order.id %>">
+                View Details
+              </button>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+    <script>
+      (function () {
+        const orders = <%- JSON.stringify(orders) %>;
+        document.querySelectorAll('[data-view-order]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const orderId = Number(button.dataset.viewOrder);
+            const order = orders.find((o) => o.id === orderId);
+            if (order) {
+              alert(
+                `Order ${order.orderNumber}\nStatus: ${order.status}\nTotal: $${Number(
+                  order.total,
+                ).toFixed(2)}\nItems: ${order.items
+                  .map((item) => `${item.name} x${item.quantity}`)
+                  .join(', ')}`,
+              );
+            }
+          });
+        });
+
+        const sendHeight = () => {
+          const height = document.body.scrollHeight;
+          window.parent?.postMessage({ type: 'ordersHeight', height }, '*');
+        };
+
+        window.addEventListener('load', sendHeight);
+        const resizeObserver = new ResizeObserver(sendHeight);
+        resizeObserver.observe(document.body);
+      })();
+    </script>
+  </body>
+</html>

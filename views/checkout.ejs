@@ -1,0 +1,156 @@
+<%- include('partials/header', { title: 'Checkout', bodyClass: 'page-checkout', cartCount: item.quantity }) %>
+<main class="page checkout-page">
+  <div class="page-hero">
+    <div>
+      <p class="eyebrow">Secure Checkout</p>
+      <h1>Checkout</h1>
+    </div>
+  </div>
+  <div class="checkout-layout">
+    <form id="checkout-form" class="card checkout-form" novalidate>
+      <section>
+        <h2>Shipping Information</h2>
+        <div class="grid two-col">
+          <label>
+            Full Name
+            <input name="customerName" required placeholder="Jamie Tester" />
+          </label>
+          <label>
+            Email
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="jamie@example.com"
+            />
+          </label>
+        </div>
+        <label>
+          Street Address
+          <input name="streetAddress" required placeholder="123 Testing Ave" />
+        </label>
+        <div class="grid two-col">
+          <label>
+            City
+            <input name="city" required placeholder="Austin" />
+          </label>
+          <label>
+            ZIP Code
+            <input name="zipCode" required placeholder="73301" />
+          </label>
+        </div>
+        <label>
+          Shipping Method
+          <select name="shippingMethod" data-shipping-select>
+            <option value="standard" data-cost="0">
+              Standard (5-7 days) - Free
+            </option>
+            <option value="express" data-cost="25">
+              Express (2-3 days) - $25.00
+            </option>
+            <option value="overnight" data-cost="45">
+              Overnight (1 day) - $45.00
+            </option>
+          </select>
+        </label>
+      </section>
+      <section>
+        <h2>Payment Method</h2>
+        <div class="payment-options">
+          <label class="radio">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="Credit Card"
+              checked
+            />
+            Credit Card
+          </label>
+          <label class="radio">
+            <input type="radio" name="paymentMethod" value="PayPal (Test Mode)" />
+            PayPal (Test Mode)
+          </label>
+          <label class="radio">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="Bank Transfer (Test Mode)"
+            />
+            Bank Transfer (Test Mode)
+          </label>
+        </div>
+      </section>
+      <section data-payment-panel="Credit Card">
+        <h2>Payment Information</h2>
+        <div class="info-box">
+          Test Card: 4111-1111-1111-1111 | CVV: 123 | Expiry: Any future date
+        </div>
+        <div class="grid two-col">
+          <label>
+            Card Number
+            <input name="cardNumber" placeholder="4111 1111 1111 1111" />
+          </label>
+          <label>
+            Name on Card
+            <input name="cardName" placeholder="Jamie Tester" />
+          </label>
+        </div>
+        <div class="grid two-col">
+          <label>
+            Expiry Date
+            <input name="expiry" placeholder="MM/YY" />
+          </label>
+          <label>
+            CVV
+            <input name="cvv" placeholder="123" />
+          </label>
+        </div>
+      </section>
+      <section class="hidden" data-payment-panel="PayPal (Test Mode)">
+        <h2>Payment Information</h2>
+        <div class="info-box">
+          PayPal Test Mode - simulate redirect and continue with the order.
+        </div>
+      </section>
+      <section class="hidden" data-payment-panel="Bank Transfer (Test Mode)">
+        <h2>Payment Information</h2>
+        <div class="info-box">
+          Bank Transfer Test Mode | Account: 12345678 | Routing: 987654321.
+        </div>
+      </section>
+      <div class="form-alert hidden" role="alert" data-alert></div>
+      <button class="btn primary block" type="submit">Place Order</button>
+    </form>
+    <aside class="card checkout-summary">
+      <h2>Order Summary</h2>
+      <div class="summary-product" data-checkout-items>
+        <p class="muted">Your cart items will appear here.</p>
+      </div>
+      <dl class="summary-list">
+        <div>
+          <dt>Subtotal</dt>
+          <dd>$<span data-subtotal><%= subtotal.toFixed(2) %></span></dd>
+        </div>
+        <div>
+          <dt>Shipping</dt>
+          <dd>$<span data-shipping><%= shipping.toFixed(2) %></span></dd>
+        </div>
+      </dl>
+      <div class="summary-total">
+        <span>Total</span>
+        <strong>$<span data-total><%= (subtotal + shipping).toFixed(2) %></span></strong>
+      </div>
+      <p class="muted small">
+        Orders remain in "Processing" so you can reference them from the Orders
+        tab for automation tests.
+      </p>
+      <a class="btn ghost block" href="/cart">Back to Cart</a>
+    </aside>
+  </div>
+</main>
+<script>
+  window.checkoutData = {
+    shipping: <%= shipping %>
+  };
+</script>
+<%- include('partials/footer') %>
