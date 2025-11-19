@@ -30,14 +30,14 @@
             <td><%= order.orderNumber %></td>
             <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
             <td><%= order.items.reduce((sum, item) => sum + (item.quantity || 0), 0) %> item(s)</td>
-            <td>$<%= Number(order.total).toFixed(2) %></td>
+            <td>£<%= Number(order.total).toFixed(2) %></td>
             <td>
               <span class="status-badge"><%= order.status %></span>
             </td>
             <td>
-              <button class="btn ghost small" data-view-order="<%= order.id %>">
-                View Details
-              </button>
+            <a class="btn ghost small" href="/orders/<%= order.orderNumber %>" target="_parent">
+              View Details
+            </a>
             </td>
           </tr>
           <% }) %>
@@ -46,23 +46,6 @@
     </section>
     <script>
       (function () {
-        const orders = <%- JSON.stringify(orders) %>;
-        document.querySelectorAll('[data-view-order]').forEach((button) => {
-          button.addEventListener('click', () => {
-            const orderId = Number(button.dataset.viewOrder);
-            const order = orders.find((o) => o.id === orderId);
-            if (order) {
-              alert(
-                `Order ${order.orderNumber}\nStatus: ${order.status}\nTotal: $${Number(
-                  order.total,
-                ).toFixed(2)}\nItems: ${order.items
-                  .map((item) => `${item.name} x${item.quantity}`)
-                  .join(', ')}`,
-              );
-            }
-          });
-        });
-
         const sendHeight = () => {
           const height = document.body.scrollHeight;
           window.parent?.postMessage({ type: 'ordersHeight', height }, '*');

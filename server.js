@@ -5,6 +5,7 @@ const {
   getOrders,
   getOrderByNumber,
   getOrdersByEmail,
+  updateOrderStatus,
   normalizeOrderStatuses,
   seedOrdersIfEmpty,
 } = require('./db');
@@ -150,6 +151,8 @@ const featuredCartItem = {
   quantity: 1,
 };
 
+const CANCELLATION_WINDOW_HOURS = 24;
+
 const safeParseJSON = (value, fallback) => {
   try {
     return JSON.parse(value);
@@ -215,6 +218,14 @@ const normalizeOrderPayload = (raw) => {
   };
 };
 
+const isWithinCancellationWindow = (order) => {
+  if (!order.createdAt) return false;
+  const created = new Date(order.createdAt);
+  if (Number.isNaN(created)) return false;
+  const diffHours = (Date.now() - created.getTime()) / 36e5;
+  return diffHours < CANCELLATION_WINDOW_HOURS;
+};
+
 app.get('/', (req, res) => {
   res.render('catalog', {
     products: catalogProducts,
@@ -256,6 +267,26 @@ app.get('/orders/embed', async (req, res) => {
   }
 });
 
+app.get('/orders/:orderNumber', async (req, res) => {
+  try {
+    const order = await getOrderByNumber(req.params.orderNumber);
+    if (!order) {
+      res.status(404).send('Order not found');
+      return;
+    }
+    const cancellable =
+      order.status !== 'Cancelled' && isWithinCancellationWindow(order);
+    const windowExpired = !cancellable && order.status !== 'Cancelled';
+    res.render('order-detail', {
+      order,
+      cancellable,
+      windowExpired,
+    });
+  } catch (error) {
+    res.status(500).send('Unable to load order');
+  }
+});
+
 app.get('/api/orders', async (req, res) => {
   try {
     const orders = await getOrders();
@@ -288,6 +319,31 @@ app.get('/api/orders/:identifier', async (req, res) => {
   } catch (error) {
     console.error('Failed to lookup order', error);
     res.status(500).json({ error: 'Unable to lookup order' });
+  }
+});
+
+app.post('/api/orders/:orderNumber/cancel', async (req, res) => {
+  try {
+    const order = await getOrderByNumber(req.params.orderNumber);
+    if (!order) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+    if (order.status === 'Cancelled') {
+      res.status(400).json({ error: 'Order already cancelled' });
+      return;
+    }
+    if (!isWithinCancellationWindow(order)) {
+      res
+        .status(400)
+        .json({ error: 'Cancellation window has expired for this order' });
+      return;
+    }
+    await updateOrderStatus(order.orderNumber, 'Cancelled');
+    res.json({ message: 'Order cancelled', orderNumber: order.orderNumber });
+  } catch (error) {
+    console.error('Failed to cancel order', error);
+    res.status(500).json({ error: 'Unable to cancel order' });
   }
 });
 

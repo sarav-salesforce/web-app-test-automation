@@ -15,7 +15,7 @@ This project is a combined UI + API playground for exercising shopping cart and 
 
 ### Install & Run
 
-```bash
+```
 npm install
 npm start
 ```
@@ -71,9 +71,18 @@ GET /api/orders/:identifier
 - When `:identifier` looks like an email (e.g. `/api/orders/jamie@example.com`), the response is an array of orders for that customer.
 - When `:identifier` is an order number (e.g. `/api/orders/ORD-1763412914312`), the response is the single order.
 
+### Cancel order
+
+```
+POST /api/orders/:orderNumber/cancel
+```
+
+- Cancels the order when it is within the 24-hour cancellation window and returns `{ "message": "Order cancelled" }`.
+- If the order is already cancelled or the window has passed, the endpoint responds with `400` and an error message.
+
 ### cURL cheatsheet
 
-```bash
+```
 # All orders
 curl http://localhost:3000/api/orders
 
@@ -92,7 +101,7 @@ curl -X POST http://localhost:3000/api/orders \
         "streetAddress": "500 QA Way",
         "city": "Denver",
         "zipCode": "80202",
-        "shippingMethod": "Express (2-3 days) - $25.00",
+        "shippingMethod": "Express (2-3 days) - £25.00",
         "paymentMethod": "Credit Card",
         "paymentDetails": { "cardEnding": "4242" },
         "items": [
@@ -112,5 +121,6 @@ curl -X POST http://localhost:3000/api/orders \
 - `/cart` - Full cart table with per-item quantities and removal confirmations.
 - `/checkout` - Shipping form, payment selection, and API-backed submission of whatever is in the cart.
 - `/orders` - Orders dashboard that embeds an iframe listing current orders.
+- `/orders/:orderNumber` - Order detail page with inline cancellation (under 24 hours).
 
 Orders created through the UI or the API land in the SQLite database (`data/orders.db`) so they persist between restarts.

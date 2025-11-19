@@ -18,16 +18,16 @@
       <dl class="summary-list">
         <div>
           <dt>Subtotal</dt>
-          <dd>$<span data-subtotal><%= subtotal.toFixed(2) %></span></dd>
+          <dd>£<span data-subtotal><%= subtotal.toFixed(2) %></span></dd>
         </div>
         <div>
           <dt>Shipping</dt>
-          <dd>$<span data-shipping><%= shipping.toFixed(2) %></span></dd>
+          <dd>£<span data-shipping><%= shipping.toFixed(2) %></span></dd>
         </div>
       </dl>
       <div class="summary-total">
         <span>Total</span>
-        <strong>$<span data-total><%= (subtotal + shipping).toFixed(2) %></span></strong>
+        <strong>£<span data-total><%= (subtotal + shipping).toFixed(2) %></span></strong>
       </div>
       <div class="summary-actions">
         <a href="/checkout" class="btn primary block">Proceed to Checkout</a>

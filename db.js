@@ -154,6 +154,13 @@ async function getOrdersByEmail(email) {
   }));
 }
 
+async function updateOrderStatus(orderNumber, status) {
+  await runAsync(
+    'UPDATE orders SET status = ? WHERE orderNumber = ?',
+    [status, orderNumber],
+  );
+}
+
 async function normalizeOrderStatuses() {
   await runAsync(
     "UPDATE orders SET status = 'Order Placed' WHERE status IS NULL OR status != 'Order Placed'",
@@ -189,7 +196,7 @@ async function seedOrdersIfEmpty() {
       streetAddress: '78 Innovation Way',
       city: 'Austin',
       zipCode: '73301',
-      shippingMethod: 'Express (2-3 days) - $25.00',
+      shippingMethod: 'Express (2-3 days) - £25.00',
       paymentMethod: 'PayPal (Test Mode)',
       paymentDetails: { transactionId: 'PAY123456' },
       items: [
@@ -228,6 +235,7 @@ module.exports = {
   getOrders,
   getOrderByNumber,
   getOrdersByEmail,
+  updateOrderStatus,
   normalizeOrderStatuses,
   seedOrdersIfEmpty,
 };

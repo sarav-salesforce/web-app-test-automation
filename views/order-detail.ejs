@@ -1,0 +1,110 @@
+<%- include('partials/header', { title: 'Order Details', bodyClass: 'page-order-detail' }) %>
+<main class="page order-detail">
+  <div class="page-hero">
+    <div>
+      <p class="eyebrow">Order Details</p>
+      <h1><%= order.orderNumber %></h1>
+      <p class="muted">
+        Placed on <%= new Date(order.createdAt).toLocaleString() %>
+      </p>
+    </div>
+    <a class="btn ghost" href="/orders">Back to Orders</a>
+  </div>
+
+  <section class="order-detail-layout">
+    <div class="card">
+      <div class="order-meta">
+        <div>
+          <p class="label">Status</p>
+          <span class="status-badge <%= order.status === 'Cancelled' ? 'status-cancelled' : '' %>" data-order-status>
+            <%= order.status %>
+          </span>
+        </div>
+        <div>
+          <p class="label">Customer</p>
+          <p><strong><%= order.customerName %></strong></p>
+          <p class="muted small"><%= order.email %></p>
+        </div>
+        <div>
+          <p class="label">Shipping</p>
+          <p><%= order.streetAddress %></p>
+          <p><%= order.city %>, <%= order.zipCode %></p>
+          <p class="muted small"><%= order.shippingMethod %></p>
+        </div>
+      </div>
+
+      <div class="order-items">
+        <h3>Items</h3>
+        <div class="item-table">
+          <% order.items.forEach((item) => { %>
+          <div class="item-row">
+            <div>
+              <strong><%= item.name %></strong>
+              <p class="muted small">SKU: <%= item.sku %></p>
+            </div>
+            <div class="muted small">Qty: <%= item.quantity %></div>
+            <div>£<%= (item.price * item.quantity).toFixed(2) %></div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <aside class="card order-summary-panel">
+      <h3>Order Summary</h3>
+      <dl class="summary-list">
+        <div>
+          <dt>Subtotal</dt>
+          <dd>£<%= Number(order.subtotal).toFixed(2) %></dd>
+        </div>
+        <div>
+          <dt>Shipping</dt>
+          <dd>£<%= Number(order.shipping).toFixed(2) %></dd>
+        </div>
+      </dl>
+      <div class="summary-total">
+        <span>Total</span>
+        <strong>£<%= Number(order.total).toFixed(2) %></strong>
+      </div>
+      <div class="order-alert hidden" data-order-alert></div>
+      <p class="muted small" data-cancel-message>
+        <% if (windowExpired) { %>
+        This order can no longer be cancelled because it is beyond the 24-hour cancellation window.
+        <% } else if (order.status === 'Cancelled') { %>
+        This order has been cancelled.
+        <% } else { %>
+        You can cancel this order within 24 hours of placement.
+        <% } %>
+      </p>
+      <button
+        class="btn danger solid block"
+        data-cancel-order
+        <%= (!cancellable) ? 'disabled' : '' %>
+      >
+        Cancel Order
+      </button>
+    </aside>
+  </section>
+</main>
+
+<div class="modal-overlay hidden" data-modal>
+  <div class="modal">
+    <h3>Cancel Order?</h3>
+    <p>
+      This action cannot be undone. Are you sure you want to cancel order
+      <strong><%= order.orderNumber %></strong>?
+    </p>
+    <div class="modal-actions">
+      <button class="btn ghost" data-close-modal>Keep Order</button>
+      <button class="btn danger" data-confirm-cancel>Cancel Order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.orderDetail = {
+    orderNumber: "<%= order.orderNumber %>",
+    canCancel: <%= cancellable ? 'true' : 'false' %>
+  };
+</script>
+<%- include('partials/footer') %>

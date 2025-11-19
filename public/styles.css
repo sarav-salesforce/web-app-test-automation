@@ -119,6 +119,12 @@ body {
   color: #dc2626;
 }
 
+.btn.danger.solid {
+  background: #dc2626;
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.25);
+}
+
 .btn.small {
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
@@ -452,6 +458,103 @@ textarea {
   min-height: 420px;
 }
 
+.order-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.order-detail-layout {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 2fr 1fr;
+}
+
+.order-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.order-meta .label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 0.3rem;
+}
+
+.order-items .item-table {
+  border-top: 1px solid #f1f5f9;
+}
+
+.order-items .item-row {
+  display: grid;
+  grid-template-columns: 2fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-summary-panel {
+  align-self: start;
+}
+
+.order-alert {
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.order-alert.success {
+  background: #ecfdf3;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.order-alert.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.status-badge.status-cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 18px;
+  width: min(420px, 90vw);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.25);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
 .checkout-line {
   display: flex;
   justify-content: space-between;
@@ -553,7 +656,8 @@ textarea {
   }
 
   .cart-layout,
-  .checkout-layout {
+  .checkout-layout,
+  .order-detail-layout {
     grid-template-columns: 1fr;
   }
 

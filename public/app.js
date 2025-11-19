@@ -121,6 +121,9 @@
   if (body.classList.contains('page-orders')) {
     initOrders();
   }
+  if (body.classList.contains('page-order-detail')) {
+    initOrderDetail();
+  }
 
   function initCatalog() {
     const searchInput = document.querySelector('[data-catalog-search]');
@@ -222,11 +225,11 @@
             <div class="item-head">
               <div>
                 <h2>${item.name}</h2>
-                <p class="muted">$${Number(item.price).toFixed(2)} each</p>
+                <p class="muted">£${Number(item.price).toFixed(2)} each</p>
                 <p class="muted small">SKU: ${item.sku}</p>
               </div>
               <div class="item-price">
-                $${(item.price * item.quantity).toFixed(2)}
+                £${(item.price * item.quantity).toFixed(2)}
               </div>
             </div>
             <div class="item-actions">
@@ -325,7 +328,7 @@
             <strong>${item.name}</strong>
             <p class="muted small">SKU: ${item.sku}</p>
           </div>
-          <div class="muted">${item.quantity} × $${item.price.toFixed(2)}</div>
+          <div class="muted">${item.quantity} × £${item.price.toFixed(2)}</div>
         </div>
       `,
         )
@@ -455,6 +458,61 @@
         if (iframe) {
           iframe.style.height = `${event.data.height}px`;
         }
+      }
+    });
+  }
+
+  function initOrderDetail() {
+    const detail = window.orderDetail;
+    if (!detail) return;
+
+    const cancelBtn = document.querySelector('[data-cancel-order]');
+    const modal = document.querySelector('[data-modal]');
+    const confirmBtn = document.querySelector('[data-confirm-cancel]');
+    const closeBtn = document.querySelector('[data-close-modal]');
+    const alertBox = document.querySelector('[data-order-alert]');
+    const statusBadge = document.querySelector('[data-order-status]');
+    const cancelMessage = document.querySelector('[data-cancel-message]');
+
+    const showAlert = (message, type) => {
+      if (!alertBox) return;
+      alertBox.textContent = message;
+      alertBox.classList.remove('hidden', 'success', 'error');
+      alertBox.classList.add(type === 'error' ? 'error' : 'success');
+    };
+
+    const openModal = () => modal?.classList.remove('hidden');
+    const closeModal = () => modal?.classList.add('hidden');
+    closeModal();
+
+    cancelBtn?.addEventListener('click', () => {
+      if (cancelBtn.disabled) return;
+      openModal();
+    });
+
+    closeBtn?.addEventListener('click', closeModal);
+
+    confirmBtn?.addEventListener('click', async () => {
+      try {
+        confirmBtn.disabled = true;
+        const response = await fetch(
+          `/api/orders/${detail.orderNumber}/cancel`,
+          { method: 'POST' },
+        );
+        const body = await response.json();
+        if (!response.ok) {
+          throw new Error(body.error || 'Unable to cancel order');
+        }
+        showAlert(`Order ${body.orderNumber} cancelled.`, 'success');
+        cancelBtn.disabled = true;
+        statusBadge.textContent = 'Cancelled';
+        statusBadge.classList.add('status-cancelled');
+        cancelMessage.textContent = 'This order has been cancelled.';
+      } catch (error) {
+        showAlert(error.message, 'error');
+      } finally {
+        confirmBtn.disabled = false;
+        closeModal();
       }
     });
   }
