@@ -52,6 +52,8 @@ Sample payload:
 }
 ```
 
+You can also send an array of order objects to `POST /api/orders` and the server will create each order in sequence and return all generated order numbers.
+
 ### Retrieve all orders
 
 ```

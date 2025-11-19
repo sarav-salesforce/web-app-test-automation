@@ -150,6 +150,71 @@ const featuredCartItem = {
   quantity: 1,
 };
 
+const safeParseJSON = (value, fallback) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+};
+
+const ensureArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (value === undefined || value === null) return [];
+  if (typeof value === 'string') {
+    const parsed = safeParseJSON(value, null);
+    if (!parsed) return [];
+    return Array.isArray(parsed) ? parsed : [parsed];
+  }
+  return [value];
+};
+
+const toNumber = (value, fallback = 0) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
+const normalizeOrderPayload = (raw) => {
+  const parsedItems = ensureArray(raw.items).map((item) => ({
+    name: item.name,
+    sku: item.sku,
+    price: toNumber(item.price, 0),
+    quantity: Math.max(1, toNumber(item.quantity, 1)),
+  }));
+
+  const paymentDetails =
+    typeof raw.paymentDetails === 'string'
+      ? safeParseJSON(raw.paymentDetails || '{}', {})
+      : raw.paymentDetails || {};
+
+  const subtotal =
+    raw.subtotal !== undefined
+      ? toNumber(raw.subtotal, 0)
+      : parsedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const shipping =
+    raw.shipping !== undefined ? toNumber(raw.shipping, 0) : 0;
+
+  const total =
+    raw.total !== undefined ? toNumber(raw.total, subtotal + shipping) : subtotal + shipping;
+
+  return {
+    customerName: raw.customerName?.trim(),
+    email: raw.email?.trim(),
+    streetAddress: raw.streetAddress?.trim(),
+    city: raw.city?.trim(),
+    zipCode: raw.zipCode?.trim(),
+    shippingMethod: raw.shippingMethod || 'Standard (5-7 days) - Free',
+    paymentMethod: raw.paymentMethod || 'Credit Card',
+    paymentDetails,
+    items: parsedItems,
+    subtotal,
+    shipping,
+    total,
+    status: raw.status || 'Order Placed',
+  };
+};
+
 app.get('/', (req, res) => {
   res.render('catalog', {
     products: catalogProducts,
@@ -228,35 +293,33 @@ app.get('/api/orders/:identifier', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const payload = req.body;
+    const incoming = Array.isArray(req.body) ? req.body : [req.body];
+    const normalized = incoming.map((entry) => normalizeOrderPayload(entry));
 
-    const items =
-      typeof payload.items === 'string'
-        ? JSON.parse(payload.items)
-        : payload.items;
-    const paymentDetails =
-      typeof payload.paymentDetails === 'string'
-        ? JSON.parse(payload.paymentDetails)
-        : payload.paymentDetails;
+    const invalidEntry = normalized.find(
+      (order) =>
+        !order.customerName ||
+        !order.email ||
+        !order.items.length ||
+        order.items.some((item) => !item.name || !item.sku),
+    );
 
-    const orderData = {
-      customerName: payload.customerName,
-      email: payload.email,
-      streetAddress: payload.streetAddress,
-      city: payload.city,
-      zipCode: payload.zipCode,
-      shippingMethod: payload.shippingMethod,
-      paymentMethod: payload.paymentMethod,
-      paymentDetails: paymentDetails || {},
-      items: items || [],
-      subtotal: Number(payload.subtotal) || 0,
-      shipping: Number(payload.shipping) || 0,
-      total: Number(payload.total) || 0,
-      status: payload.status || 'Processing',
-    };
+    if (invalidEntry) {
+      res.status(400).json({ error: 'Invalid order payload' });
+      return;
+    }
 
-    const { orderNumber } = await createOrder(orderData);
-    res.status(201).json({ message: 'Order created', orderNumber });
+    const orderNumbers = [];
+    for (const orderData of normalized) {
+      const { orderNumber } = await createOrder(orderData);
+      orderNumbers.push(orderNumber);
+    }
+
+    res.status(201).json({
+      message: orderNumbers.length > 1 ? 'Orders created' : 'Order created',
+      orderNumber: orderNumbers[0],
+      orderNumbers,
+    });
   } catch (error) {
     console.error('Failed to create order', error);
     res.status(500).json({ error: 'Unable to create order' });
